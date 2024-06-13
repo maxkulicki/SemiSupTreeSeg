@@ -2,7 +2,7 @@
 
 **DISCLAIMER: The discriminator models in their current form don't really work, they are not able to reliably distinguish bad and good predictions. But the pipeline is finished, so if you figure out how to train a working discriminator, you can use this code to run semi-supervised training**.
 
-Based on TreeLearn [arXiv](https://arxiv.org/abs/2309.08471), [PointGL](https://github.com/Roywangj/PointGL/) and [TLSpecies](https://github.com/mataln/TLSpecies).
+Based on [TreeLearn](https://github.com/ecker-lab/TreeLearn), [PointGL](https://github.com/Roywangj/PointGL/) and [TLSpecies](https://github.com/mataln/TLSpecies).
 
 This repo builds upon the TreeLearn architecture for individual tree segmentation in a way that enables training on unlabelled data.
 The model can be trained on its own predictions by incorporating an additional discriminator model, which identifies badly segmented samples and makes sure that these are not used for training. 
