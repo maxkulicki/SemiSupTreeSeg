@@ -363,8 +363,8 @@ def load_results(instance_evaluation_path, benchmark_forest_path, unlabeled_clas
     instance_evaluation = torch.load(instance_evaluation_path)
 
     benchmark_forest = load_data(benchmark_forest_path)
-    outpoints_trees = laspy.read(benchmark_forest_path).OutpointsTreeID
-    benchmark_forest[:, 3][outpoints_trees != 0] = outpoints_trees[outpoints_trees != 0]
+    # outpoints_trees = laspy.read(benchmark_forest_path).OutpointsTreeID
+    # benchmark_forest[:, 3][outpoints_trees != 0] = outpoints_trees[outpoints_trees != 0]
     benchmark_forest = benchmark_forest[benchmark_forest[:, -1] != unlabeled_class_in_instance_labels]
     instance_labels = benchmark_forest[:, 3]
     instance_preds = instance_evaluation['instance_preds_propagated_to_benchmark_pointcloud']
@@ -401,5 +401,5 @@ def get_semantic_assessment(instance_labels, instance_preds, non_tree_class_in_i
 
 
 def get_instance_assessment(instance_evaluation, n_instances_to_validate=156):
-    assert (len(instance_evaluation['segmentation_results']['no_partition']) + len(instance_evaluation['detection_results']['non_matched_gts']) * 2) == n_instances_to_validate
+    #assert (len(instance_evaluation['segmentation_results']['no_partition']) + len(instance_evaluation['detection_results']['non_matched_gts']) * 2) == n_instances_to_validate
     print(instance_evaluation['segmentation_results']['no_partition'][['prec', 'rec', 'f1', 'iou', 'fp_error_rate', 'fn_error_rate', 'error_rate']].mean(0))

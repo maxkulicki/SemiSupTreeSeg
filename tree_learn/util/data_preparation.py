@@ -25,6 +25,10 @@ def load_data(path):
             data = np.hstack((data["points"], data["labels"][:,np.newaxis]))
     elif path.endswith('.las') or path.endswith('.laz'):
         las_file = laspy.read(path)
+
+        if hasattr(las_file, 'PredInstance'):
+            las_file.treeID = las_file.PredInstance.astype(np.int32)
+
         if hasattr(las_file, 'treeID') and hasattr(las_file, 'classification'):
             treeID = np.array(las_file.treeID)
             classes = np.array(las_file.classification)
@@ -319,7 +323,14 @@ class SampleGenerator:
 
 
     def tile_generate_and_save(self, inner_edge, outer_edge, stride, compressed=False, plot_corners=None, logger=None):
-        logger.info('defining plot corners')
+        #logger.info('defining plot corners')
+        import psutil
+
+        mem = psutil.virtual_memory()
+        print(f"Total: {mem.total / (1024**3):.2f} GB")
+        print(f"Available: {mem.available / (1024**3):.2f} GB")
+        print(f"Used: {mem.used / (1024**3):.2f} GB")
+
         if plot_corners is not None:
             plot_corners = np.array(plot_corners)
             # center plot corners and points
@@ -351,8 +362,11 @@ class SampleGenerator:
             ymin = np.round(self.y_range[0] - 1.5 * outer_edge, 2)
             ymax = np.round(self.y_range[1] + 1.5 * outer_edge, 2)
 
-        logger.info('setting up grid')
-
+        #logger.info('setting up grid')
+        print('setting up grid')
+        print(f"Total: {mem.total / (1024**3):.2f} GB")
+        print(f"Available: {mem.available / (1024**3):.2f} GB")
+        print(f"Used: {mem.used / (1024**3):.2f} GB")
         # calculate number of columns based on desired inner_edge length (will not be fulfilled perfectly)
         ncols = int(np.round((xmax - xmin - 2 * outer_edge) / inner_edge))
         inner_edge_x = (xmax - xmin - 2 * outer_edge) / ncols
@@ -384,7 +398,11 @@ class SampleGenerator:
         y_points = points[:, 1]
 
 
-        logger.info('subset all points with outer square extensions')
+        #logger.info('subset all points with outer square extensions')
+        print('subset all points with outer square extensions')
+        print(f"Total: {mem.total / (1024**3):.2f} GB")
+        print(f"Available: {mem.available / (1024**3):.2f} GB")
+        print(f"Used: {mem.used / (1024**3):.2f} GB")
         chunks = []
         for xmin_outer, xmax_outer, ymin_outer, ymax_outer in outer_square_extension:
 
@@ -398,7 +416,11 @@ class SampleGenerator:
             chunks.append(chunk)
 
 
-        logger.info('only select chunks whose inner squares contain points')
+        #logger.info('only select chunks whose inner squares contain points')
+        print('only select chunks whose inner squares contain points')
+        print(f"Total: {mem.total / (1024**3):.2f} GB")
+        print(f"Available: {mem.available / (1024**3):.2f} GB")
+        print(f"Used: {mem.used / (1024**3):.2f} GB")
         valid_chunks = []
         valid_inner_square_extension = []
         for i in range(len(chunks)):
@@ -419,17 +441,22 @@ class SampleGenerator:
         valid_inner_square_extension = np.array(valid_inner_square_extension).astype(np.float32)
 
 
-        logger.info('center chunks')
+        #logger.info('center chunks')
+        print('center chunks')
+        print(f"Total: {mem.total / (1024**3):.2f} GB")
+        print(f"Available: {mem.available / (1024**3):.2f} GB")
+        print(f"Used: {mem.used / (1024**3):.2f} GB")
         for i in range(len(valid_chunks)):
             chunk_center_x = np.round((valid_inner_square_extension[i][0] + valid_inner_square_extension[i][1]) / 2, 6)
             chunk_center_y = np.round((valid_inner_square_extension[i][2] + valid_inner_square_extension[i][3]) / 2, 6)
             center = np.concatenate([np.array([chunk_center_x, chunk_center_y, 0, 0]), np.zeros(self.feats.shape[1])]).reshape(1, -1)
             valid_chunks[i] = (torch.from_numpy(valid_chunks[i]).cuda() - torch.from_numpy(center).cuda()).cpu().numpy()
 
-
-        logger.info('denoise')
+        #logger.info('denoise')
+        print('denoise')
         for i, valid_chunk in tqdm(enumerate(valid_chunks)):
-
+            self.multiplier_sor = None
+            self.rad = None
             # denoise
             if self.n_neigh_sor is not None and self.multiplier_sor is not None:
                 sor_filter_idx = sor_filter(valid_chunk, n_neigh_sor=self.n_neigh_sor, multiplier_sor=self.multiplier_sor)
@@ -460,7 +487,6 @@ class SampleGenerator:
             chunk_center_x = np.round((valid_inner_square_extension[i][0] + valid_inner_square_extension[i][1]) / 2, 6)
             chunk_center_y = np.round((valid_inner_square_extension[i][2] + valid_inner_square_extension[i][3]) / 2, 6)
             center = np.array([chunk_center_x, chunk_center_y, 0])
-
             data = dict()
             data['points'] = points
             data['feat'] = feat

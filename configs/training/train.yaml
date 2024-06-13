@@ -29,8 +29,8 @@ scheduler: # learning rate scheduler arguments (see https://timm.fast.ai/schedul
   cycle_limit: 1
   t_in_epochs: True
 
-epochs: 1400 # number of epochs to train
-examples_per_epoch: 500 # number of crops to use per epoch
+epochs: 3 # number of epochs to train
+examples_per_epoch: 20 # number of crops to use per epoch
 fp16: True # using half precision for network prediction
 pretrain: 'data/model_weights/hais_ckpt_spconv2.pth' # path to pretrained network parameters, set to ~ if not using pretrain
 grad_norm_clip: True # gradient clipping to avoid excessive gradient magnitude

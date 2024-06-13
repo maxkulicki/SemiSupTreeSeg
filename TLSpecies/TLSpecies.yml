@@ -1,0 +1,21 @@
+name: tlspecies
+
+channels:
+  - pytorch
+  - conda-forge
+
+dependencies:
+  - python=3.8
+  - jupyterlab
+  - jupyterlab-git
+  - matplotlib >=3.3
+  - scikit-learn
+  - wandb
+  - tqdm
+  - pandas
+  - seaborn
+  
+  - cudatoolkit=11.3
+  - pytorch::pytorch>=1.11.0
+  - torchvision
+  

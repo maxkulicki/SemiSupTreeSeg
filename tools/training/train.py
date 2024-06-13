@@ -24,12 +24,10 @@ def train(config, epoch, model, optimizer, scheduler, scaler, train_loader, logg
     start = time.time()
     losses_dict = defaultdict(list)
 
-
     for i, batch in enumerate(train_loader, start=1):
         # break after a fixed number of samples have been passed
         if config.examples_per_epoch < (i * config.dataloader.train.batch_size):
             break
-        
         scheduler.step(epoch)
         optimizer.zero_grad()
         with torch.cuda.amp.autocast(enabled=config.fp16):

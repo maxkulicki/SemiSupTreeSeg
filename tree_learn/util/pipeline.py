@@ -22,11 +22,14 @@ N_JOBS = 10 # number of threads/processes to use for several functions that have
 
 
 # function to generate tiles
-def generate_tiles(cfg, forest_path, logger):
+def generate_tiles(cfg, forest_path, logger=None):
     plot_name = os.path.basename(forest_path)[:-4]
     base_dir = os.path.dirname(os.path.dirname(forest_path))
+    print("BASE DIR")
+    print(base_dir)
 
     # dirs for data saving
+    print(cfg)
     voxelized_dir = osp.join(base_dir, f'forest_voxelized{cfg.voxel_size}')
     features_dir = osp.join(base_dir, 'features')
     save_dir = osp.join(base_dir, 'tiles')
@@ -35,14 +38,14 @@ def generate_tiles(cfg, forest_path, logger):
     os.makedirs(save_dir, exist_ok=True)
 
     # voxelize forest
-    logger.info('voxelizing forest...')
+    print('voxelizing forest...')
     save_path_voxelized = osp.join(voxelized_dir, f'{plot_name}.npz')
-    if not osp.exists(save_path_voxelized):
-        data = load_data(forest_path)
-        data = voxelize(data, cfg.voxel_size)
-        data = np.round(data, 2)
-        data = data.astype(np.float32)
-        np.savez_compressed(save_path_voxelized, points=data[:, :3], labels=data[:, 3])
+    #if not osp.exists(save_path_voxelized):
+    data = load_data(forest_path)
+    data = voxelize(data, cfg.voxel_size)
+    data = np.round(data, 2)
+    data = data.astype(np.float32)
+    np.savez_compressed(save_path_voxelized, points=data[:, :3], labels=data[:, 3])
         # features = np.load(save_path_features)
         # features = features['features']
         # data_features = voxelize(np.hstack((data, features)), cfg.voxel_size)
@@ -51,15 +54,17 @@ def generate_tiles(cfg, forest_path, logger):
         # np.savez_compressed(save_path_features, features=features.astype(np.float32))
 
     # calculating features
-    logger.info('calculating features...')
+    #logger.info('calculating features...')
+    print('calculating features...')
     save_path_features = osp.join(features_dir, f'{plot_name}.npz')
-    if not osp.exists(save_path_features):
-        data = load_data(save_path_voxelized)
-        features = compute_features(points=data[:, :3].astype(np.float64), search_radius=cfg.search_radius_features, feature_names=['verticality'], num_threads=N_JOBS)
-        np.savez_compressed(save_path_features, features=features)
+    #if not osp.exists(save_path_features):
+    data = load_data(save_path_voxelized)
+    features = compute_features(points=data[:, :3].astype(np.float64), search_radius=cfg.search_radius_features, feature_names=['verticality'], num_threads=N_JOBS)
+    np.savez_compressed(save_path_features, features=features)
 
     # add cfg args that were generated dynamically based on plot
-    logger.info('getting tiles...')
+    #logger.info('getting tiles...')
+    print('getting tiles...')
     cfg.sample_generator.plot_path = osp.join(voxelized_dir, f'{plot_name}.npz')
     cfg.sample_generator.features_path = osp.join(features_dir, f'{plot_name}.npz')
     cfg.sample_generator.save_dir = save_dir

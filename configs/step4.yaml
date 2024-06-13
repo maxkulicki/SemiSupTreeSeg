@@ -1,0 +1,83 @@
+# default_args is used to include configs from the _modular folder into this config. This ensures a modular way of combining different config files.
+# Individual entries of the loaded default args can be changed by simply redefining them as is done below under 'modification of default args'
+model_path: 'models/segmentation/model_raw.pth'
+discriminator_path: 'models/discriminator/best_model.pth'
+default_args: ["configs/_modular/model.yaml", "configs/_modular/dataset_train.yaml", "configs/_modular/dataset_test.yaml"]
+#generator_data_path: 'data/train_semi_sup/forests/test.las'
+#discriminator_dataset_path: 'data/discriminator/RealPredDataset.pt'
+semisup_dir: "data/semisup/"
+grouping:
+    tree_conf_thresh: 0.5 # minimum confidence (with regard to semantic prediction) for a point to be predicted as belonging to trees. Only predicted tree points are used during clustering
+    tau_vert: 0.6 # minimum verticality for a point to be considered during clustering
+    tau_off: 2 # maximum distance from the tree base for a point to be considered during clustering
+    tau_group: 0.15 # grouping radius of offset-shifted coordinates for clustering
+    tau_min: 100 # After grouping, clusters containing less points than this are discarded immediately since they are deemed to small to be a tree
+    training: True # True if dataset used for training; False if used for validation
+
+dataset_semi_sup:
+  training: True 
+  data_root: 'data/step2_data_for_discriminator/tiles/npz' # folder where crops for model training are located
+  data_augmentations:
+    jitter: True
+    flip: True
+    rot: True
+    scaled: False
+    point_jitter: False
+  inner_square_edge_length: 8 # Length of inner square to be used for training. E.g. if tiles/crops are 30mx30m, this indicates that only inner 8x8 is taken into account
+
+sample_generation:
+  voxel_size: 0.1 # downsampling of input point cloud so that there is only one point left within a cube of size voxel_size x voxel_size x voxel_size
+  search_radius_features: 0.4 # search radius to compute local geometry features of a point (in the paper, only verticality feature is used)
+  inner_edge: 8 # only needed or tile generation and not for random crops. Designates the inner area to be used for making predictions
+  outer_edge: 13.5 # only needed or tile generation and not for random crops. Designates the outer area which is used as context
+  stride: 0.5 # only needed or tile generation and not for random crops. Designates the stride of the inner square. If set to 1, the tiles are generated without overlap. Smaller numbers lead to overlap.
+
+  # sample generator args
+  sample_generator: # arguments for statistical and neighbor based filtering of point cloud. For details: http://www.open3d.org/docs/latest/tutorial/Advanced/pointcloud_outlier_removal.html
+    n_neigh_sor: 2
+    multiplier_sor: 1
+    rad: ~ # usage of this filter is deprecated
+    npoints_rad: ~ # usage of this filter is deprecated
+
+############ modification default args
+model:
+  spatial_shape: [500, 500, 1000]
+
+# ############ non-default args
+dataloader:
+  train:
+    batch_size: 2
+    num_workers: 2
+  test:
+    batch_size: 1
+    num_workers: 1
+  train_semi_sup:
+    batch_size: 1
+    num_workers: 1
+  discriminator:
+    batch_size: 1
+    num_workers: 1
+
+# optimizer:
+#   type: 'AdamW'
+#   lr: 0.002
+#   weight_decay: 0.001
+
+# scheduler: # learning rate scheduler arguments (see https://timm.fast.ai/schedulers for details)
+#   t_initial: 1300
+#   lr_min: 0.0001
+#   cycle_decay: 1
+#   warmup_lr_init: 0.00001
+#   warmup_t: 50
+#   cycle_limit: 1
+#   t_in_epochs: True
+
+# epochs: 3 # number of epochs to train
+# examples_per_epoch: 5 # number of crops to use per epoch
+# fp16: True # using half precision for network prediction
+# pretrain: 'data/model_weights/hais_ckpt_spconv2.pth' # path to pretrained network parameters, set to ~ if not using pretrain
+# grad_norm_clip: True # gradient clipping to avoid excessive gradient magnitude
+
+# # validation args
+# save_frequency: 20 # save frequency of state dict
+# validation_frequency: 1 # validation frequency

@@ -15,7 +15,7 @@ class TreeDataset(Dataset):
                  data_root,
                  inner_square_edge_length,
                  training,
-                 logger,
+                 logger=None,
                  data_augmentations=None):
 
         self.data_paths = [os.path.join(data_root, path) for path in os.listdir(data_root)]
@@ -24,7 +24,8 @@ class TreeDataset(Dataset):
         self.training = training
         self.data_augmentations = data_augmentations
         mode = 'train' if training else 'test'
-        self.logger.info(f'Load {mode} dataset: {len(self.data_paths)} scans')
+        if self.logger is not None:
+            self.logger.info(f'Load {mode} dataset: {len(self.data_paths)} scans')
 
 
     def __len__(self):
@@ -34,8 +35,7 @@ class TreeDataset(Dataset):
     def __getitem__(self, index):
         # load data
         data_path = self.data_paths[index]
-        data = np.load(data_path)
-        
+        data = np.load(data_path)        
         # get entries
         xyz = data['points']
         input_feat = data['feat']

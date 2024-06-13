@@ -26,8 +26,8 @@ def evaluate(config, config_path=None):
 
     # load pred and ground truth
     benchmark_forest = load_data(config.benchmark_forest_path)
-    # outpoints_trees = laspy.read(config.benchmark_forest_path).OutpointsTreeID
-    # benchmark_forest[:, 3][outpoints_trees != 0] = outpoints_trees[outpoints_trees != 0]
+    outpoints_trees = laspy.read(config.benchmark_forest_path).treeID#OutpointsTreeID
+    benchmark_forest[:, 3][outpoints_trees != 0] = outpoints_trees[outpoints_trees != 0]
     benchmark_forest = benchmark_forest[benchmark_forest[:, 3] != INSTANCE_LABEL_IGNORE_IN_RAW_DATA]
     benchmark_forest_coords = benchmark_forest[:, :3]
     benchmark_forest_instance_labels = benchmark_forest[:, 3]
@@ -39,7 +39,7 @@ def evaluate(config, config_path=None):
 
     # propagate instance predictions to benchmark pointcloud
     logger.info('propagating predictions to coords of benchmark...')
-    instance_preds = propagate_preds(pred_forest_coords, instance_preds, benchmark_forest_coords, 5)
+    instance_preds = propagate_preds(pred_forest_coords, instance_preds, benchmark_forest_coords, 1)
     instance_preds = instance_preds - 1
 
     # make labels consecutive and get unique instance preds
